@@ -4,54 +4,66 @@ using UnityEngine;
 
 public class AiMovement : MonoBehaviour
 {
-    // Start is called before the first frame update
-    void Start()
-    {
-        
-    }
+    public Transform player;
+    public float chaseDistance;
+    //an array of Transforms symbolised by []
+    public Transform[] waypoints;
+    public int waypointIndex = 0;
 
-    public GameObject position0;
-    public GameObject position1;
+    public float minGoalDist = 0.1f;
+    public float speed = 1.5f;
 
     void Update()
     {
-        //transform.position = Vector2.MoveTowards(transform.position, position0.transform.position,
-                                                                        //Time.deltaTime);
-        // Vector2 AiPosition = transform.position;
-
-        /*if (transform.position.x < position0.transform.position.x)
+        //if within player chase distance chace player else move to goal
+        if (Vector2.Distance(transform.position, player.position) < chaseDistance)
         {
-            //Move right
-            AiPosition.x += (1 * Time.deltaTime);
-            transform.position = AiPosition;
+
+            AIMoveToward(player.position);
         }
         else
         {
-            //Move left
-            AiPosition.x -= (1 * Time.deltaTime);
-            transform.position = AiPosition;
+            //moves to goal
+            WaypointUpdate();
+            AIMoveToward(waypoints[waypointIndex].position);
         }
-        if (transform.position.y < position0.transform.position.y)
+
+        //Vector2.MoveTowards(transform.position, position[positionIndex].transform.position, 1 * Time.deltaTime);
+
+    }
+
+    private void AIMoveToward(Vector3 GoalPos)
+    {
+        Vector2 AiPosition = transform.position;
+
+        //if the AI is not near the goal then dont move
+        if (Vector2.Distance(AiPosition, GoalPos) > minGoalDist)
         {
-            // .up gives the upward direction
-            // (vector 3) sets as vector3 and vector2 gets the relvant 2D info
-                                // as to not have a redundant value in a vector3
-            //Move up
-            transform.position += (Vector3) Vector2.up * 1 * Time.deltaTime;
+            //direction form A to B
+            // is B - A
+
+            // Normalize converts a direction and makes the length of it = 1
+            // if normalize wasnt here would make object move faster if it was further away and slower when closer
+            Vector2 directionToPos0 = GoalPos - transform.position;
+            directionToPos0.Normalize();
+            transform.position += (Vector3)directionToPos0 * speed * Time.deltaTime;
         }
-        else
+    }
+    private void WaypointUpdate()
+    {
+        Vector2 AiPosition = transform.position;
+
+        //if the AI is near the goal 
+        if (Vector2.Distance(AiPosition, waypoints[waypointIndex].position) < minGoalDist)
         {
-            //Move down
-            transform.position -= (Vector3) Vector2.up * 1 * Time.deltaTime;
-        } */
+            //increment by 1
+            waypointIndex++;
 
-        //direction form A to B
-        // is B - A
-
-        Vector2 directionToPos0 = position0.transform.position - transform.position;
-        // Normalize converts a direction and makes the length of it = 1
-        // if normalize wasnt here would make object move faster if it was further away and slower when closer
-        directionToPos0.Normalize();
-        transform.position += (Vector3) directionToPos0 * 1 * Time.deltaTime;
+            //change waypoint
+            if (waypoints.Length <= waypointIndex)
+            {
+                waypointIndex = 0;
+            }
+        }
     }
 }
